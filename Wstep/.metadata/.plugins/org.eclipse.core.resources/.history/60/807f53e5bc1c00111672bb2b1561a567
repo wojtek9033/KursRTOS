@@ -1,0 +1,11 @@
+#include "cmsis_os.h"
+
+static volatile uint32_t cnt1 = 0;
+static volatile uint32_t cnt2 = 0;
+
+
+
+int main()
+{
+
+}
