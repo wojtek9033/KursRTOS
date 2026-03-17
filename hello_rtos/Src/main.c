@@ -27,6 +27,7 @@ int main(void)
 	osThreadNew(Task1, NULL, NULL);
 	osThreadNew(Task2, NULL, NULL);
 
+
 	osKernelStart();
 
 	while(1)
