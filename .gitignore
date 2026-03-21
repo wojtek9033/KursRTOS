@@ -1,0 +1,13 @@
+# Build artifacts
+Debug/
+Release/
+build/
+
+# IDE
+.settings/
+.metadata/
+
+# Binaries
+*.elf
+*.bin
+*.map
