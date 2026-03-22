@@ -1,4 +1,5 @@
 #include "serial.h"
+#include "timebase.h"
 #include "stm32f4xx.h"
 #include "cmsis_helpers.h"
 
@@ -37,10 +38,55 @@ HAL_Status_t halSerialPut(const char data)
 {
 	while(!(USART2->SR & USART_SR_TXE))
 	{
-		/*Lets imagine Timeout here*/
 	}
 	USART2->DR = (data & 0xFF);
 
+	return HAL_OK;
+}
+
+HAL_Status_t halSerialPut_Timeout(const char data, uint32_t timeout)
+{
+	uint32_t ticks_start = halGetTicks();
+	while(!(USART2->SR & USART_SR_TXE))
+	{
+		/*
+		 * While Serial Port is busy, count system ticks to check for timeout
+		 */
+		if (halGetTicks() > ticks_start + timeout)
+		{
+			return HAL_TIMEOUT;
+		}
+	}
+	USART2->DR = (data & 0xFF);
+
+	return HAL_OK;
+}
+
+HAL_Status_t halSerialSend(const char* txt)
+{
+	while (*txt != 0)
+	{
+		HAL_Status_t status = halSerialPut(*txt);
+		if (status == HAL_TIMEOUT)
+		{
+			return HAL_TIMEOUT;
+		}
+		txt++;
+	}
+	return HAL_OK;
+}
+
+HAL_Status_t halSerialSend_Timeout(const char* txt, uint32_t timeout)
+{
+	while (*txt != 0)
+	{
+		HAL_Status_t status = halSerialPut_Timeout(*txt, timeout);
+		if (status == HAL_TIMEOUT)
+		{
+			return HAL_TIMEOUT;
+		}
+		txt++;
+	}
 	return HAL_OK;
 }
 
