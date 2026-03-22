@@ -46,8 +46,9 @@ int main(void)
 	 *
 	 * Rule:
 	 * 	Do not ever pass a local variable to a task that lives longer than the variable scope
-	 * 	Local variables leave on the STACK.
-	 * 	Global variables & dynamically allocated memory lives on the HEAP.
+	 * 	Local variables live on the STACK.
+	 * 	Dynamically allocated memory lives on the HEAP.
+	 * 	Global & static variables DO NOT LIVE on the STACK, nor on the HEAP. They live in other, special place.
 	 */
 
 	halSerialInit();
