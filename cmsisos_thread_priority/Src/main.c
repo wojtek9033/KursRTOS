@@ -6,7 +6,7 @@
 static volatile uint32_t cnt1;
 static volatile uint32_t cnt2;
 
-/* EXAMPLE OF PREEMPTION & THREAD STARVING */
+/* EXAMPLE OF PREEMPTION & TASK STARVING */
 
 void Task1()
 {
@@ -54,7 +54,7 @@ osThreadAttr_t task1_attr = {
 
 osThreadAttr_t task2_attr = {
 		//.priority = osPriorityHigh both cnt1 and cnt2 get incremented (Task2 has  higher priority)
-		.priority = osPriorityNormal // only cnt1 gets incremented  - example of THREAD (Task2) STARVING
+		.priority = osPriorityNormal // only cnt1 gets incremented  - example of TASK (Task2) STARVING
 };
 
 int main(void)
