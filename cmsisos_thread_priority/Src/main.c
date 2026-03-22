@@ -6,11 +6,7 @@
 static volatile uint32_t cnt1;
 static volatile uint32_t cnt2;
 
-/*
- * Task1 and Task2 have the same priority (not explicitly defined in this example)
- * So the scheduler switches between them even if Task1 "forces wait" by polling
- * for TimerTicks. This allows both cnt1 and cnt2 to be incremented "in parallel"
- */
+/* EXAMPLE OF PREEMPTION & THREAD STARVING */
 
 void Task1()
 {
@@ -28,7 +24,7 @@ void Task1()
 		// This results in waiting full second
 		while(osKernelGetTickCount() < ticks_start + freq)
 		{
-
+			// NOT releasing control
 		}
 	}
 }
@@ -43,17 +39,31 @@ void Task2()
 	while(1)
 	{
 		cnt2++;
-		osDelay(freq);
+		osDelay(freq); // releasing control
 	}
 }
+
+/*
+ * Preemption (wywłaszczanie) works only for the tasks of the same priority!!!
+ */
+
+osThreadAttr_t task1_attr = {
+		//.priority = osPriorityNormal both cnt1 and cnt2 get incremented (Task1 has  lower priority)
+		.priority = osPriorityHigh // only cnt1 gets incremented - example of TASK(Task2) STARVING
+};
+
+osThreadAttr_t task2_attr = {
+		//.priority = osPriorityHigh both cnt1 and cnt2 get incremented (Task2 has  higher priority)
+		.priority = osPriorityNormal // only cnt1 gets incremented  - example of THREAD (Task2) STARVING
+};
 
 int main(void)
 {
 	halSerialInit();
 	osKernelInitialize();
 
-	osThreadNew(Task1, NULL, NULL);
-	osThreadNew(Task2, NULL, NULL);
+	osThreadNew(Task1, NULL, &task1_attr);
+	osThreadNew(Task2, NULL, &task2_attr);
 
 	osKernelStart();
 
