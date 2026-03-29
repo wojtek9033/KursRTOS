@@ -13,6 +13,8 @@ volatile static uint32_t queue_err_full = 0;
 volatile static uint32_t queue_err_empty = 0;
 
 volatile osMutexId_t queue_mutex;
+volatile osSemaphoreId_t queue_semaphore_filled;
+volatile osSemaphoreId_t queue_semaphore_empty;
 
 void queue_put(uint32_t data)
 {
@@ -53,13 +55,24 @@ void Producer(void* args)
 	uint32_t cnt = 0;
 	while(1)
 	{
-		queue_put(cnt);
-		if (queue_err_full == 0)\
+		osSemaphoreAcquire(queue_semaphore_filled, osWaitForever);
+		/*
+		 * with this semaphore filled, the producer can start its work only after
+		 * some tokens became available - consumer popped (processed) data from queue.
+		 * Logic: Can not put more data, if consumer did not release tokens - meaning
+		 * it is not "full of work"
+		 */
+		if (queue_err_full == 0)
 		{
+			queue_put(cnt);
 			cnt++;
+			osSemaphoreRelease(queue_semaphore_empty);
+			/*
+			 * Produces puts tokens to semaphore empty, meaning "hey, I already produced some data"
+			 */
 		}
 
-		osDelay(rand() % 500);
+		osDelay(rand() % 300);
 		/*
 		 * in scenario where Producer puts data every 1 second, while the consumer
 		 * tries constantly to pop the queue (it is empty before put), the empty
@@ -72,12 +85,22 @@ void Consumer(void* args)
 {
 	while(1)
 	{
-		uint32_t data = queue_pop();
+		osSemaphoreAcquire(queue_semaphore_empty, osWaitForever);
+		/*
+		 * with this semaphore empty, the consumer can start its work only after
+		 * some tokens became available - producer has put the data into queue.
+		 * Logic: Can not process data, if it is not available
+		 */
 		if (queue_err_empty == 0)
 		{
+			uint32_t data = queue_pop();
 			printf("%ld\r\n", data);
 		}
-		osDelay(rand() % 1500); //random delay
+		osDelay(rand() % 900);
+		osSemaphoreRelease(queue_semaphore_filled);
+		/*
+		 * Consumer puts tokens to semaphore filled, meaning "hey, I am done with processing"
+		 */
 	}
 }
 
@@ -87,7 +110,8 @@ int main(void)
 	osKernelInitialize();
 
 	queue_mutex = osMutexNew(NULL);
-
+	queue_semaphore_empty = osSemaphoreNew(QUEUE_SIZE, 0, NULL);
+	queue_semaphore_filled = osSemaphoreNew(QUEUE_SIZE, QUEUE_SIZE, NULL);
 	osThreadNew(Producer, NULL, NULL);
 	osThreadNew(Consumer, NULL, NULL);
 
