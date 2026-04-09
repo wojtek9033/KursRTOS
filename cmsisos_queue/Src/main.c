@@ -5,6 +5,12 @@
 #include "cmsis_os.h"
 #include "serial.h"
 
+/*
+ * In general, queues can be implemented using semaphors, mutexes and events.
+ * However, queues in RTOS are so common, that CMSISOS API introduces its
+ * queue implementation
+ */
+
 #define QUEUE_SIZE 4
 
 volatile static osMessageQueueId_t queue;
