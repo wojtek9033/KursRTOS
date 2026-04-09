@@ -13,6 +13,7 @@ void vDelay1(UBaseType_t xDelayMs)
 	vTaskDelay(pdMS_TO_TICKS(xDelayMs));
 }
 
+
 void vDelay2(UBaseType_t xDelayMs)
 {
 	BaseType_t xTicksStart = xTaskGetTickCount();
@@ -30,8 +31,8 @@ void vTask(void* pvParameters)
 	while(1)
 	{
 		(*puxPtr)++;
-		//vDelay1(10);
-		vDelay2(10);
+		//vDelay1(10); Task Blocking
+		vDelay2(10); // Busy wait - polling
 	}
 }
 
