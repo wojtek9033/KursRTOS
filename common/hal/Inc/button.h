@@ -5,6 +5,6 @@
 #include "hal_common.h"
 
 HAL_Status_t halButtonInit(void);
-HAL_Status_t halGetButtonGetState(uint32_t *state);
+HAL_Status_t halButtonGetState(uint32_t *state);
 
 #endif
