@@ -9,11 +9,6 @@
 #include "led.h"
 #include "button.h"
 
-/*
- * Upgraded version of freertos6_btn_event. This one uses separate control task to
- * decouple LED Control from Button task. It utilizes event flags.
- */
-
 #define EVT_BTN_PRESSED (1<<0)
 #define EVT_TIMEOUT (1<<1)
 
