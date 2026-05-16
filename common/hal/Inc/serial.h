@@ -10,4 +10,7 @@ HAL_Status_t halSerialPut_Timeout(const char data, uint32_t timeout);
 HAL_Status_t halSerialSend(const char* txt);
 HAL_Status_t halSerialSend_Timeout(const char* txt, uint32_t timeout);
 
+HAL_Status_t halSerialSetInterruptPriority(uint32_t priority);
+HAL_Status_t halSerialRegisterCallback(void (*callback) (char));
+
 #endif

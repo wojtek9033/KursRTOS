@@ -2,6 +2,9 @@
 #include "timebase.h"
 #include "stm32f4xx.h"
 #include "cmsis_helpers.h"
+#include <stddef.h>
+
+static void (*_rxCallback)(char) = NULL;
 
 HAL_Status_t halSerialInit(void)
 {
@@ -27,6 +30,11 @@ HAL_Status_t halSerialInit(void)
 	USART2->BRR = uart_div;
 
 	USART2->CR1 |= (USART_CR1_TE | USART_CR1_RE);
+
+	/*Enable interrupt when new data has arrived*/
+	USART2->CR1 |= USART_CR1_RXNEIE;
+	NVIC_SetPriority(USART2_IRQn, 15);
+	NVIC_EnableIRQ(USART2_IRQn);
 
 	/*Turn-on UART module*/
 	USART2->CR1 |= USART_CR1_UE;
@@ -94,4 +102,30 @@ int __io_putchar(int ch)
 {
 	halSerialPut(ch);
 	return ch;
+}
+
+HAL_Status_t halSerialSetInterruptPriority(uint32_t priority)
+{
+	NVIC_SetPriority(USART2_IRQn, priority);
+	return HAL_OK;
+}
+
+HAL_Status_t halSerialRegisterCallback(void (*callback) (char))
+{
+	_rxCallback = callback;
+	return HAL_OK;
+}
+
+void USART2_IRQHandler(void)
+{
+	// from startup_stm32f411retx.s
+	if (USART2->SR & USART_SR_RXNE) // if data in receive buffer
+	{
+		char data = USART2->DR & 0xFF; //mask to get only first 8 bit
+
+		if (_rxCallback != NULL) // if callback has been registered
+		{
+			_rxCallback(data);
+		}
+	}
 }
