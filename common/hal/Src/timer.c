@@ -48,6 +48,8 @@ void TIM2_IRQHandler(void)
 		TIM2->SR &= ~TIM_SR_UIF;
 
 		if (_timerCallback != NULL)
+		{
 			_timerCallback();
+		}
 	}
 }

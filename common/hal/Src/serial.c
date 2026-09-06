@@ -100,7 +100,7 @@ HAL_Status_t halSerialSend_Timeout(const char* txt, uint32_t timeout)
 
 int __io_putchar(int ch)
 {
-	halSerialPut(ch);
+	halSerialPut_Timeout(ch, 50);
 	return ch;
 }
 
